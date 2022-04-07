@@ -1,0 +1,90 @@
+<body>
+	<label for="widescreen">Widescreen?</label>
+	<input id="widescreen" type="checkbox"/>
+	<br>
+
+	<label for="progressive">Progressive?</label>
+	<input id="progressive" type="checkbox"/>
+	<br>
+
+	<label for="stereo">Stereo?</label>
+	<input id="stereo" type="checkbox"/>
+	<br>
+
+	<label for="language_select">Language:</label>
+	<input id="language_select" value="TODO!"</input>
+	<br>
+
+	<label for="mus_vol_slider">Music volume:</label>
+	<input type="range" min="0" max="2047" value="0" id="mus_vol_slider">
+	<input type="number" min="0" max="2047" value="0" id="mus_vol_text"/>
+	<br>
+
+	<label for="sfx_vol_slider">Effects volume:</label>
+	<input type="range" min="0" max="2047" value="0" id="sfx_vol_slider">
+	<input type="number" min="0" max="2047" value="0" id="sfx_vol_text"/>  
+	<br>
+
+	<label for="disp_xpos">X Offset:</label>
+	<input type="number" min="0" max="65535" value="0" id="disp_xpos"/>
+	<br>
+
+	<label for="disp_ypos">Y Offset:</label>
+	<input type="number" min="0" max="65535" value="0" id="disp_ypos"/>
+	<br>
+
+	<input type="text" value="" id="result"/>
+	<input type="button" id="do_result" value="Generate"/>
+<script>
+getElem = function(id) { return document.getElementById(id); }
+isChecked = function(id) { return getElem(id).checked ? 1 : 0; }
+
+var MUSIC_VOLUME = 0;
+var SFX_VOLUME = 1;
+var sliders = [
+	[document.getElementById("mus_vol_slider"), document.getElementById("mus_vol_text")],
+	[document.getElementById("sfx_vol_slider"), document.getElementById("sfx_vol_text")],
+];
+
+sliders.forEach(function(slider, idx) {
+	f = function() {
+		sliders[idx][0].value = this.value;
+		sliders[idx][1].value = this.value;
+	}
+	slider[0].oninput = f;
+	slider[1].oninput = f;
+});
+
+getElem("do_result").addEventListener('click', function() {
+	var mus_vol = sliders[MUSIC_VOLUME][0].value & 0x7FF;
+	var sfx_vol = sliders[SFX_VOLUME][0].value & 0x7FF;
+
+	var wide = isChecked("widescreen");
+	var stereo = isChecked("stereo");
+	var progressive = isChecked("progressive");
+	var language = 5 & 0x7; //TODO
+	var xpos = getElem("disp_xpos").value & 0xFFFF;
+	var ypos = getElem("disp_ypos").value & 0xFFFF;
+
+	var bopt= 0;
+	bopt |= (xpos << 48);
+	bopt |= (ypos << 32);
+	bopt |= (sfx_vol << 25);
+	bopt |= (mus_vol << 14);
+	bopt |= (stereo << 2);
+	bopt |= (progressive << 1);
+	bopt |= wide;
+	
+	bopt_str = "";
+	for (i = 0; i < 8; i++) {
+		bopt_str += (bopt & 0xFF).toString(16);
+		bopt >>= 2;
+	}
+	
+
+	getElem("result").value = bopt_str;
+});
+</script>
+  
+</body>
+</html>
